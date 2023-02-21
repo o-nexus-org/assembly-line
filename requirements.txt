@@ -1,0 +1,13 @@
+Pillow==8.1.0
+
+pyqrcode==1.2.1
+git+https://github.com/matmair/brother_ql-inventree.git # feb 2020
+pytest==7.2.1
+
+esptool==4.3
+streamlit==1.5.1
+openpyxl==3.1.1
+pyxlsb==1.0.10
+xlsxwriter==3.0.8
+# Pillow==9.3.0
+# pyusb==1.2.1
