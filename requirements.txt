@@ -1,6 +1,6 @@
 Pillow==8.1.0
-
-pyqrcode==1.2.1
+opencv-python==4.7.0.68
+qrcode==7.4.2
 git+https://github.com/matmair/brother_ql-inventree.git # feb 2020
 pytest==7.2.1
 
