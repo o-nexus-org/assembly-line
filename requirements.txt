@@ -6,6 +6,7 @@ pytest==7.2.1
 
 esptool==4.3
 streamlit==1.5.1
+click==8.0.4
 openpyxl==3.1.1
 pyxlsb==1.0.10
 xlsxwriter==3.0.8
