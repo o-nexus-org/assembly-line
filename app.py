@@ -17,6 +17,8 @@ from src.utils import (delete_files_in_folder,
                        save_binary_locally,
                        save_prov_locally
 )
+from src import qr
+
 
 def update_excel_file(mac: str, sim_number: str) -> Tuple[bool, str]:
     try:
@@ -134,7 +136,7 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         command = """testing/data/file.sh"""
         form.info("MAC FOUND: " + mac)
         sim_number = form.text_input('Enter sim card number', max_chars=20)            
-        sent = form.form_submit_button("Submit")
+        sent = form.form_submit_button("Submit & print")
         if sent:
             save_prov_locally(df, prov_local_fp, 
                             temp_folder=TEMP_FOLDER)
@@ -144,7 +146,13 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
                                                     sim_number=sim_number)
             print('updated')
             print("Form submitted!")
+            print('heyy must print nowww')
+            qr.create_and_print_qr(mac=mac, address=address, n_copy=4)
             print(form)
+            # if updated:
+            #     if st.button('Print label'):
+            #         print('heyy must print nowww')
+            #         qr.create_and_print_qr(mac=mac, address=address, n_copy=2)
         # form.info(f'Processing row {st.session_state["CURRENT_ROW"]} of {total_rows}')  # noqa: E501
 
     #     submit_button = form.form_submit_button('Confirm SIM and update record')
