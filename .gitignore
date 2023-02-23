@@ -5,3 +5,4 @@ temp_/
 __pycache__/
 *.py[cod]
 *.egg-info/
+firmware*.bin
