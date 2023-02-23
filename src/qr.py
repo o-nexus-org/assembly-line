@@ -7,6 +7,8 @@ import os
 import subprocess
 import qrcode
 from PIL import Image, ImageFont, ImageDraw, ImageOps
+from src.utils import run_bash 
+
 
 
 def write_qr(mac) -> str:
@@ -65,14 +67,6 @@ def create_qr(mac: str,
                                         address=address,
                                         show=show)
     return out_fp
-
-
-def run_bash(command: str) -> str:
-    process = subprocess.run(command, shell=True,
-                             check=True,
-                             capture_output=True)
-    out = process.stdout.decode('utf-8').strip()
-    return out
 
 
 def print_qr(img_fp: str, n_copy: int = 1):

@@ -1,5 +1,6 @@
 from pathlib import Path
 import shutil
+import subprocess
 import pandas as pd
 
 def delete_files_in_folder(folder: str) -> None:
@@ -28,3 +29,19 @@ def save_prov_locally(df: pd.DataFrame,
         pass
     else:
         df.to_pickle(prov_local_fp)
+        
+        
+def run_bash(command: str) -> str:
+    try:
+        process = subprocess.run(command, shell=True,
+                                check=True,
+                                capture_output=True)
+        out = process.stdout.decode('utf-8').strip()
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            # no error code, but no output
+            out = ""
+        else:
+            msg = f"command '{e.cmd}' return with error (code {e.returncode}): {e.output}"
+            raise RuntimeError(msg)
+    return out

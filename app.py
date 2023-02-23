@@ -13,7 +13,7 @@ from src.checks import (raise_err_if_file_is_filled_in,
 from src.process import (extract_mac_from_stream,)
 from src.config import TEMP_FOLDER, prov_local_fp, bin_dest
 from src.excel import to_excel
-from src.utils import (delete_files_in_folder, 
+from src.utils import (delete_files_in_folder,
                        save_binary_locally,
                        save_prov_locally
 )
@@ -68,16 +68,18 @@ if __name__ == "__main__":
         st.error('Please select a valid firmware binary')
     if selected_prov is None:
         st.error('Please select a provisioning file')
-
+    print('here')
     if 'CURRENT_ROW' not in st.session_state:
         numerator = '1'
     else:
         numerator = str(st.session_state['CURRENT_ROW'])
 
     col1, col2 = st.columns(2)
+    
+    
 
     ready = selected_prov is not None and selected_bin is not None
-    
+
     # this is done to avoid the error if file is not selected
     if selected_prov is not None:
         df = read_prov(selected_prov)
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         total_rows=0
         n_updated_files=None
     # end of check if done
-    
+
     done = total_rows == n_updated_files
     if done:
         idx_last_row = n_updated_files - 1
@@ -97,7 +99,7 @@ if __name__ == "__main__":
         st.success ("""Each address has a MAc and an ICCID now.
                     You can download the complete provisioning file or start over (ON THE TOP LEFT).
 
-This file contains only the 'site' tab, 
+This file contains only the 'site' tab,
 DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         """)
         st.download_button(
@@ -106,9 +108,10 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         file_name="MAC_SIM" + selected_prov.name,
         )
         st.stop()
-    
-    elif ready:
+
+    elif ready or st.session_state.get('ready'):
         # ready to run
+        st.session_state['ready'] = True
 
 
         st.session_state['TOTAL_ROWS'] = total_rows
@@ -126,19 +129,27 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         #     delete = st.button("Start over")
         #     st.session_state['CURRENT_ROW'] = 0
         #     st.stop()
-        
+
         command = """testing/data/file.sh"""
+        command = '''esptool.py --chip esp32 --port /dev/ttyUSB0 \
+                                --baud 460800 --before default_reset \
+                                --after hard_reset write_flash \
+                                --erase-all -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 firmware/bootloader.bin 0x8000 firmware/partitions.bin 0xd68000 firmware/spiffs.bin 0x20000 {selected_bin}
+                                '''
+        print(command)
         # command = """sleep 5"""
         mac = extract_mac_from_stream(command)
         # save original provisioning file
         form = st.form("my_form")
-        command = '''esptool....'''
-        command = """testing/data/file.sh"""
+
+        # command = """testing/data/file.sh"""
+        print(command)
         form.info("MAC FOUND: " + mac)
-        sim_number = form.text_input('Enter sim card number', max_chars=20)            
+        sim_number = form.text_input('Enter sim card number', max_chars=20)
         sent = form.form_submit_button("Submit & print")
-        if sent:
-            save_prov_locally(df, prov_local_fp, 
+        if sent or st.session_state.get('sent'):
+            st.session_state['sent'] = True
+            save_prov_locally(df, prov_local_fp,
                             temp_folder=TEMP_FOLDER)
             save_binary_locally(selected_bin, bin_dest,
                                 temp_folder=TEMP_FOLDER)
@@ -158,7 +169,7 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
     #     submit_button = form.form_submit_button('Confirm SIM and update record')
     #     if submit_button and st.button('Confirm SIM and update record'):
     #         print('updated2')
-    #         save_prov_locally(df, prov_local_fp, 
+    #         save_prov_locally(df, prov_local_fp,
     #                         temp_folder=TEMP_FOLDER)
     #         save_binary_locally(selected_bin, bin_dest,
     #                             temp_folder=TEMP_FOLDER)
@@ -169,9 +180,9 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
 
 
 
-                
+
     #             # if st.session_state['MAC']:
-                    
+
     #             #     st.info(f'Found MAC: {mac}')
     #             #     sim_number = st.text_input('Enter sim card number', max_chars=20)
     #             #     print('sim entereddddd')
@@ -185,8 +196,8 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
     #             #     else:
     #             #         print(sim_number)
     #             #         print('not good sim')
-                        
-    
+
+
     #             #     if st.button('Confirm SIM and update record') and len(sim_number) > 15 :
     #             #         # st.success('ICCID entered')
     #             #         print('yooooo')
