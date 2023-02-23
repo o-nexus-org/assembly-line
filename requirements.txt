@@ -12,3 +12,4 @@ pyxlsb==1.0.10
 xlsxwriter==3.0.8
 # Pillow==9.3.0
 # pyusb==1.2.1
+-e .

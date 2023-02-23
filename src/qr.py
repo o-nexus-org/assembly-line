@@ -13,9 +13,11 @@ from src.utils import run_bash
 
 def write_qr(mac) -> str:
     QRcode = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_H
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=5,
     )
     url = f'https://afmelden.o-nexus.com/?mac={mac}'
+    url = 'google.com'
     QRcode.add_data(url)
     QRcode.make()
     # adding color to QR code
@@ -37,7 +39,17 @@ def add_mac_and_address_to_img(img_path: str,
     black_color_rgb = (0,0,0)
     white_color_rgb = (255,255,255)
     img = Image.open(img_path)
-    img = ImageOps.expand(img, border=19, fill=white_color_rgb)
+    
+    # TODO, just a test
+    #img = ImageOps.expand(img, border=30, fill=white_color_rgb)
+    # add empty space to the left of the QR code
+    exp_cm = 3
+    exp_px = int(exp_cm * 37.79527559055118)
+    new_shape_pixels = (img.width+exp_px, img.height)
+    img = ImageOps.fit(img, new_shape_pixels, method=Image.ANTIALIAS,
+                 #bleed=0.0, centering=(0.5, 0.5)
+    )
+    # end TODO
     draw = ImageDraw.Draw(img)
     font_path = os.path.join(cv2.__path__[0],'qt','fonts','DejaVuSans.ttf')
     font = ImageFont.truetype(font_path, size=52)
@@ -49,6 +61,7 @@ def add_mac_and_address_to_img(img_path: str,
     draw.text((0,470),address,black_color_rgb,font=font,
               align='center',
               )
+    print('QR code TO BE generated!')
     out_fp = f'temp_/QR_{mac}_print.png'
     Path(out_fp).unlink(missing_ok=True)
     img.save(out_fp)
@@ -77,7 +90,7 @@ def print_qr(img_fp: str, n_copy: int = 1):
     print(f"{first_part_usb} {sec_part_usb}")
     cmd = f"brother_ql -p 'usb://0x{first_part_usb}:0x{sec_part_usb}' -b pyusb --model QL-700 print --label 29 {img_fp}"
     while n_copy > 0:
-        out =  run_bash(cmd)
+        out = run_bash(cmd)
         n_copy -= 1
         print(out)
     
@@ -94,7 +107,9 @@ if __name__ == "__main__":
 
     mac = "B8D61A188B2C"
     address = "Govert Flinkstraat 7"
+    print('start')
     out_fp = create_qr(mac=mac, address=address, show=True)
-    print_qr(img_fp=out_fp)
+    print(out_fp)
+    #print_qr(img_fp=out_fp)
 
 
