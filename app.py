@@ -75,6 +75,8 @@ if __name__ == "__main__":
         numerator = str(st.session_state['CURRENT_ROW'])
 
     col1, col2 = st.columns(2)
+    
+    
 
     ready = selected_prov is not None and selected_bin is not None
 
@@ -107,8 +109,9 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         )
         st.stop()
 
-    elif ready:
+    elif ready or st.session_state.get('ready'):
         # ready to run
+        st.session_state['ready'] = True
 
 
         st.session_state['TOTAL_ROWS'] = total_rows
@@ -128,11 +131,11 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         #     st.stop()
 
         command = """testing/data/file.sh"""
-        # command = '''esptool.py --chip esp32 --port /dev/ttyUSB0 \
-        #                         --baud 460800 --before default_reset \
-        #                         --after hard_reset write_flash \
-        #                         --erase-all -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 firmware/bootloader.bin 0x8000 firmware/partitions.bin 0xd68000 firmware/spiffs.bin 0x20000 {selected_bin}
-        #                         '''
+        command = '''esptool.py --chip esp32 --port /dev/ttyUSB0 \
+                                --baud 460800 --before default_reset \
+                                --after hard_reset write_flash \
+                                --erase-all -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 firmware/bootloader.bin 0x8000 firmware/partitions.bin 0xd68000 firmware/spiffs.bin 0x20000 {selected_bin}
+                                '''
         print(command)
         # command = """sleep 5"""
         mac = extract_mac_from_stream(command)
@@ -144,7 +147,8 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         form.info("MAC FOUND: " + mac)
         sim_number = form.text_input('Enter sim card number', max_chars=20)
         sent = form.form_submit_button("Submit & print")
-        if sent:
+        if sent or st.session_state.get('sent'):
+            st.session_state['sent'] = True
             save_prov_locally(df, prov_local_fp,
                             temp_folder=TEMP_FOLDER)
             save_binary_locally(selected_bin, bin_dest,

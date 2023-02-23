@@ -1,3 +1,7 @@
 .envrc
 temp_/
+# ignore any folder with __pycache__ in it
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*.egg-info/
