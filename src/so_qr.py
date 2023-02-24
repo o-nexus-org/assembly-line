@@ -4,6 +4,7 @@ requirements.txt
 qrcode==7.4.2
 Pillow==8.1.0
 opencv-python==4.7.0.68
+wand=0.6.11
 """
 import os
 from pathlib import Path
@@ -12,7 +13,8 @@ import cv2
 import qrcode
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 
-def create_qr_img() -> str:
+
+def create_qr_img(box_size: int) -> str:
     QRcode = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=5,
@@ -72,9 +74,47 @@ def add_str_to_img(img_path: str,
     print('QR code generated!')
     return out_fp
 
+def break_fix(text, width, font, draw):
+    if not text:
+        return
+    lo = 0
+    hi = len(text)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        t = text[:mid]
+        w, h = draw.textsize(t, font=font)
+        if w <= width:
+            lo = mid
+        else:
+            hi = mid - 1
+    t = text[:lo]
+    w, h = draw.textsize(t, font=font)
+    yield t, w, h
+    yield from break_fix(text[lo:], width, font, draw)
+
+def fit_text(img, text, color, font):
+    width = img.size[0] - 2
+    draw = ImageDraw.Draw(img)
+    pieces = list(break_fix(text, width, font, draw))
+    height = sum(p[2] for p in pieces)
+    if height > img.size[1]:
+        raise ValueError("text doesn't fit")
+    y = (img.size[1] - height) // 2
+    for t, w, h in pieces:
+        x = (img.size[0] - w) // 2
+        draw.text((x, y), t, font=font, fill=color)
+        y += h
+
+
 if __name__ == '__main__':
     img_path = create_qr_img()
-    add_str_to_img(img_path, 
-                   'ExampleAboveQr', 
-                   'This is some long string. It could be multi-line. 22222222', 
-                   show=True)
+    # add_str_to_img(img_path, 
+    #                'ExampleAboveQr', 
+    #                'This is some long string. It could be multi-line. 22222222', 
+    #                show=True)
+    img = Image.open(img_path)
+    img = Image.new('RGB', (128, 48), color='black')
+    font_path = os.path.join(cv2.__path__[0],'qt','fonts','DejaVuSans.ttf')
+    font = ImageFont.truetype(font_path, size=52)
+    img_fit = fit_text(img, 'LongerTextGoesHere', (255,255,0), font)
+    img_fit.show()

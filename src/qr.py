@@ -11,10 +11,14 @@ from src.utils import run_bash
 
 
 
-def write_qr(mac) -> str:
+def write_qr(mac, box_size: int) -> str:
+    """ 
+    https://pypi.org/project/qrcode/
+    box_size means how many pixels each box of the QR code will be
+    """
     QRcode = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=5,
+        box_size=box_size,
     )
     url = f'https://afmelden.o-nexus.com/?mac={mac}'
     url = 'google.com'
