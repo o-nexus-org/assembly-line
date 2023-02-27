@@ -18,6 +18,8 @@ from src.utils import (delete_files_in_folder,
                        save_prov_locally
 )
 from src import qr
+from src import label
+from src import print
 
 
 def update_excel_file(mac: str, sim_number: str) -> Tuple[bool, str]:
@@ -57,6 +59,8 @@ if __name__ == "__main__":
 
         selected_prov = st.file_uploader("Select provisioning file",
                                          type=['xlsx'])
+        df = read_prov(selected_prov)
+        city_prov = df['city'].unique()[0].capitalize()
         error_for_file_upload = raise_err_if_file_is_filled_in(selected_prov)
         selected_bin = st.file_uploader("Select firmware version", type=['bin'])
         error_bin_file = check_binary_has_bin_ending(selected_bin)
@@ -158,7 +162,9 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
             print('updated')
             print("Form submitted!")
             print('heyy must print nowww')
-            qr.create_and_print_qr(mac=mac, address=address, n_copy=4)
+            # TODO extract city
+            label_img = label.create_label_png(mac=mac, address=address, city='city')
+            print.print_img(img=label_img, n_copy=4)
             print(form)
             # if updated:
             #     if st.button('Print label'):
