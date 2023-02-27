@@ -17,10 +17,13 @@ def write_qr(mac, box_size: int) -> str:
     box_size means how many pixels each box of the QR code will be
     """
     QRcode = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        # ref https://www.qrcode.com/en/about/error_correction.html
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
         box_size=box_size,
     )
     url = f'https://afmelden.o-nexus.com/?mac={mac}'
+    # url = f'afmelden.o-nexus.com/?mac={mac}'
+    # url = 'test'
     url = 'google.com'
     QRcode.add_data(url)
     QRcode.make()

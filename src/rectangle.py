@@ -6,10 +6,7 @@ import numpy as np
 from src.qr import print_qr, write_qr
 
 from PIL import Image, ImageFont, ImageDraw, ImageOps
-import os 
-import cv2
-font_path = os.path.join(cv2.__path__[0],'qt','fonts','DejaVuSans.ttf')
-
+import os
 
 def cm_to_pixels(cm: float) -> int:
     return int(cm * 37.79527559055118)
@@ -31,7 +28,10 @@ def split_long_string(string, max_len_per_row=25):
 
 cm_w = 2.9
 cm_h = 5 # this is the length of the lable
+mac = 'B8D61A188B2C'
+# mac = 'test'
 
+font_path = 'assets/LucidaSansRegular.ttf'
 w, h = cm_to_pixels(cm=cm_w), cm_to_pixels(cm=cm_h)
 shape = [(40, 40), (w - 10, h - 10)]
   
@@ -39,20 +39,22 @@ shape = [(40, 40), (w - 10, h - 10)]
 img = Image.new("RGB", (w, h), color='white')
 
 
+# this is temporary/ debug
 out_fp = f'temp_/QR_11_print.png'
 Path(out_fp).unlink(missing_ok=True)
 img.save(out_fp)
 
-qr_out = write_qr(mac='test', box_size=2.5)
+qr_out = write_qr(mac=mac, box_size=3)
 qr_img = Image.open(qr_out)
-
+qr_img = qr_img.resize((74, 74))
 
 
 img.paste(qr_img, (40, 0), qr_img.convert('RGBA'))
 
 # text
 # on top of the QR code
-mac = 'B8D61A188B2C'
+
+print(font_path)
 font = ImageFont.truetype(font_path, size=15)
 
 
@@ -63,7 +65,7 @@ d = ImageDraw.Draw(img)
 w, h = d.textsize(mac, font=font)
 
 #  add MAC address
-width_and_height = (60, 8)
+width_and_height = (68, 8)
 print(width_and_height)
 d.text(width_and_height, 
        mac, 
@@ -97,7 +99,7 @@ d.text(width_and_height,
        "Rotterdam", 
        font=font, fill='black')
 
-# img.show()
+img.show()
 
 out_print = f'temp_/QR_11_print.png'
 img = img.rotate(angle=-90, expand=True)
