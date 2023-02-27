@@ -23,8 +23,6 @@ def write_qr(mac, box_size: int) -> str:
     )
     url = f'https://afmelden.o-nexus.com/?mac={mac}'
     # url = f'afmelden.o-nexus.com/?mac={mac}'
-    # url = 'test'
-    url = 'google.com'
     QRcode.add_data(url)
     QRcode.make()
     # adding color to QR code
@@ -120,3 +118,8 @@ if __name__ == "__main__":
     #print_qr(img_fp=out_fp)
 
 
+def make_qr_img(mac: str, box_size: int=3) -> Image.Image:
+    qr_out = write_qr(mac=mac, box_size=box_size)
+    qr_img = Image.open(qr_out)
+    qr_img = qr_img.resize((70, 70))
+    return qr_img
