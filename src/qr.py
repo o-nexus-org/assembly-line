@@ -16,7 +16,6 @@ def write_qr(mac, box_size: int) -> str:
         box_size=box_size,
     )
     url = f'https://afmelden.o-nexus.com/?mac={mac}'
-    # url = f'afmelden.o-nexus.com/?mac={mac}'
     QRcode.add_data(url)
     QRcode.make()
     # adding color to QR code
