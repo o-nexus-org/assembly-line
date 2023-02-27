@@ -1,6 +1,9 @@
 from pathlib import Path
 import shutil
 import subprocess
+import random
+import string
+
 import pandas as pd
 
 def delete_files_in_folder(folder: str) -> None:
@@ -45,3 +48,10 @@ def run_bash(command: str) -> str:
             msg = f"command '{e.cmd}' return with error (code {e.returncode}): {e.output}"
             raise RuntimeError(msg)
     return out
+
+
+def get_random_string(length: int) -> str:
+    # choose from all lowercase letter
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str

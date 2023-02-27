@@ -1,6 +1,13 @@
 ## 
+## Setup
 
-TODO:
+```sh
+pip install -r requirements.txt
+```
 
-Choose 1 way to print qr code!
-and add to app
+
+
+Add .envrc file
+```env
+layout anaconda python_310
+```
