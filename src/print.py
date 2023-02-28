@@ -1,7 +1,7 @@
 
 
 from typing import Optional
-from Pil import Image
+from PIL import Image
 from src.utils import run_bash, get_random_string
 
 
