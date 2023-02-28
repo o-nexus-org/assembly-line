@@ -1,3 +1,4 @@
+from pprint import pprint as pp
 from pathlib import Path
 import shutil
 import subprocess
@@ -37,8 +38,8 @@ def save_prov_locally(df: pd.DataFrame,
 def run_bash(command: str) -> str:
     try:
         process = subprocess.run(command, shell=True,
-                                check=True,
-                                capture_output=True)
+                                 check=True,
+                                 capture_output=True)
         out = process.stdout.decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         if e.returncode == 1:
@@ -46,7 +47,11 @@ def run_bash(command: str) -> str:
             out = ""
         else:
             msg = f"command '{e.cmd}' return with error (code {e.returncode}): {e.output}"
-            raise RuntimeError(msg)
+            msg = e.output
+            for line in msg.decode('utf-8').splitlines():
+                pp(str(line))
+            err_msg = f"Could not flash GW. Error: {e.returncode}"
+            raise RuntimeError(err_msg)
     return out
 
 

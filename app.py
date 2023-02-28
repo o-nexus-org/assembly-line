@@ -19,8 +19,8 @@ from src.utils import (delete_files_in_folder,
 )
 from src import qr
 from src import label
-from src import print
-
+from src.print import print_img
+from src.listener_esp import flash_esp
 
 def update_excel_file(mac: str, sim_number: str) -> Tuple[bool, str]:
     try:
@@ -59,8 +59,7 @@ if __name__ == "__main__":
 
         selected_prov = st.file_uploader("Select provisioning file",
                                          type=['xlsx'])
-        df = read_prov(selected_prov)
-        city_prov = df['city'].unique()[0].capitalize()
+
         error_for_file_upload = raise_err_if_file_is_filled_in(selected_prov)
         selected_bin = st.file_uploader("Select firmware version", type=['bin'])
         error_bin_file = check_binary_has_bin_ending(selected_bin)
@@ -90,10 +89,14 @@ if __name__ == "__main__":
         total_rows = len(df)
         # check if done
         n_updated_files = len(list(Path(TEMP_FOLDER).rglob("updated*.pkl")))
+        city_prov = df['city'].unique()[0].capitalize()
+            
     else:
+        city_prov = 'No file selected'
         total_rows=0
         n_updated_files=None
     # end of check if done
+    print(f'city_prov={city_prov}')
 
     done = total_rows == n_updated_files
     if done:
@@ -134,38 +137,34 @@ DO NOT OVERWRITE THE ORIGINAL PROVISIONING!!!
         #     st.session_state['CURRENT_ROW'] = 0
         #     st.stop()
 
-        command = """testing/data/file.sh"""
-        command = '''esptool.py --chip esp32 --port /dev/ttyUSB0 \
-                                --baud 460800 --before default_reset \
-                                --after hard_reset write_flash \
-                                --erase-all -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 firmware/bootloader.bin 0x8000 firmware/partitions.bin 0xd68000 firmware/spiffs.bin 0x20000 {selected_bin}
-                                '''
-        print(command)
-        # command = """sleep 5"""
-        mac = extract_mac_from_stream(command)
-        # save original provisioning file
-        form = st.form("my_form")
+        mac, err = flash_esp()
+        if err:
+            # error
+            st.error("Please try flashing again:" + err)
+        else:
+            # save original provisioning file
+            form = st.form("my_form")
 
-        # command = """testing/data/file.sh"""
-        print(command)
-        form.info("MAC FOUND: " + mac)
-        sim_number = form.text_input('Enter sim card number', max_chars=20)
-        sent = form.form_submit_button("Submit & print")
-        if sent or st.session_state.get('sent'):
-            st.session_state['sent'] = True
-            save_prov_locally(df, prov_local_fp,
-                            temp_folder=TEMP_FOLDER)
-            save_binary_locally(selected_bin, bin_dest,
+            # command = """testing/data/file.sh"""
+            # print(command)
+            form.info("MAC FOUND: " + mac)
+            sim_number = form.text_input('Enter sim card number', max_chars=20)
+            sent = form.form_submit_button("Submit & print")
+            if sent or st.session_state.get('sent'):
+                st.session_state['sent'] = True
+                save_prov_locally(df, prov_local_fp,
                                 temp_folder=TEMP_FOLDER)
-            updated, address = update_excel_file(mac=mac,
-                                                    sim_number=sim_number)
-            print('updated')
-            print("Form submitted!")
-            print('heyy must print nowww')
-            # TODO extract city
-            label_img = label.create_label_png(mac=mac, address=address, city='city')
-            print.print_img(img=label_img, n_copy=4)
-            print(form)
+                save_binary_locally(selected_bin, bin_dest,
+                                    temp_folder=TEMP_FOLDER)
+                updated, address = update_excel_file(mac=mac,
+                                                        sim_number=sim_number)
+                print('updated')
+                print("Form submitted!")
+                print('heyy must print nowww')
+                # TODO extract city
+                label_img = label.create_label_png(mac=mac, address=address, city='city')
+                print_img(img=label_img, n_copy=4)
+                print(form)
             # if updated:
             #     if st.button('Print label'):
             #         print('heyy must print nowww')
